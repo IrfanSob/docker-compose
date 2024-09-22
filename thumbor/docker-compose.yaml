@@ -1,0 +1,76 @@
+services:
+  thumbor:
+    container_name: thumbor
+    image: minimalcompact/thumbor:6.7.5
+    restart: always
+    ports:
+      - "80:8888"
+    environment:
+      - TZ=Asia/Jakarta
+      - HEALTHCHECK_ROUTE=/
+      - THUMBOR_PORT=8888
+      - THUMBOR_NUM_PROCESSES=4
+      - CORS_ALLOW_ORIGIN=*
+      - AUTO_WEBP=True
+      - RESULT_STORAGE=thumbor.result_storages.file_storage
+      - RESULT_STORAGE_STORES_UNSAFE=False
+      - FILTERS=['thumbor.filters.watermark']
+      - MAX_AGE=15768000
+      - MAX_AGE_TEMP_IMAGE=300
+      - RESULT_STORAGE_EXPIRATION_SECONDS=86400
+      - ALLOW_UNSAFE_URL=False
+      - LOADER=tc_aws.loaders.s3_loader
+      - TC_AWS_LOADER_BUCKET=s3-v2-klikdokter-media-bucket
+      - TC_AWS_LOADER_ROOT_PATH=
+      - TC_AWS_ENABLE_HTTP_LOADER=False
+      - TC_AWS_ALLOWED_BUCKETS=False
+      - STORAGE=tc_aws.storages.s3_storage
+      - TC_AWS_REGION=ap-southeast-1
+      - TC_AWS_STORAGE_BUCKET=s3-v2-klikdokter-media-bucket
+      - TC_AWS_STORAGE_ROOT_PATH=
+
+      - AWS_ACCESS_KEY_ID=AKIA6ODU7Z27RYW3ASUK
+      - AWS_SECRET_ACCESS_KEY=RGpUOgvfQT5ZTu3MuFCXqSm2WjprG6XmbcgXyXpei
+      - SECURITY_KEY=aGFsby1oYWxvLjh1bSFMbG9oYWxvaGEudGh1TWIwcg==
+
+    volumes:
+      - thumbor-data:/data
+      - thumbor-logs:/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+    deploy:
+      resources:
+        reservations:
+          cpus: 0.25
+          memory: 50M
+        limits:
+          cpus: 0.5
+          memory: 100M
+    networks:
+      - network-thumbor
+
+# create volume from different docker-compose.yaml
+volumes:
+  thumbor-data:
+    name: thumbor-data
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/thumbor/data
+
+  thumbor-logs:
+    name: thumbor-logs
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/thumbor/logs
+
+networks:
+  network-thumbor:
+    name: network-thumbor
+    driver: bridge

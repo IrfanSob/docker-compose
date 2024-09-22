@@ -4,7 +4,7 @@ services:
     image: docker.io/bitnami/redis:7.4
     restart: always
     ports:
-      - "6379"
+      - "6379:6379"
     environment:
       - TZ=Asia/Jakarta
       - REDIS_PASSWORD=aGFsby1oYWxvLjh1bSFMbG9oYWxvaGE=

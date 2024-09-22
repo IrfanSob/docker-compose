@@ -1,0 +1,127 @@
+volumes:
+  loki-conf:
+    name: loki-conf
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/grafana/loki/loki-conf
+
+  promtail-conf:
+    name: promtail-conf
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/grafana/promtail/promtail-conf
+
+  promtail-log:
+    name: promtail-log
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/grafana/promtail/promtail-log
+
+services:
+  loki:
+    container_name: loki
+    image: grafana/loki:2.9.2
+    ports:
+      - "3100:3100"
+    environment:
+      - TZ=Asia/Jakarta
+    volumes:
+      - loki-conf:/etc/loki/
+    command: -config.file=/etc/loki/local-config.yaml
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+        limits:
+          cpus: "0.5"
+          memory: 1024M
+    networks:
+      - grafana
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:2.9.2
+    volumes:
+      - promtail-log:/var/log
+      - promtail-conf:/etc/promtail/
+    command: -config.file=/etc/promtail/config.yml
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    networks:
+      - grafana
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    environment:
+      - TZ=Asia/Jakarta
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    ports:
+      - "3000:3000"
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+        limits:
+          cpus: "0.5"
+          memory: 1024M
+    networks:
+      - grafana
+
+networks:
+  grafana:
+    name: grafana
+    driver: bridge

@@ -1,0 +1,31 @@
+services:
+  typesense:
+    image: typesense/typesense:27.0
+    restart: on-failure
+    ports:
+      - "8108:8108"
+    environment:
+      - TZ=Asia/Jakarta
+    volumes:
+      - ./typesense-data:/data
+    command: '--data-dir /data --api-key=xyz --enable-cors'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.5"
+          memory: 100M
+        limits:
+          cpus: "1"
+          memory: 200M
+    networks:
+      - network-typesense
+
+networks:
+  network-typesense:
+    name: network-typesens
+    driver: bridge

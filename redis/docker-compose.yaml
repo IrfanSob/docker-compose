@@ -1,0 +1,42 @@
+services:
+  redis-main:
+    container_name: redis-main
+    image: docker.io/bitnami/redis:7.4
+    restart: always
+    ports:
+      - "6379"
+    environment:
+      - TZ=Asia/Jakarta
+      - REDIS_PASSWORD=aGFsby1oYWxvLjh1bSFMbG9oYWxvaGE=
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+    volumes:
+      - "redis:/bitnami/redis/data"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+    deploy:
+      resources:
+        reservations:
+          cpus: 0.25
+          memory: 50M
+        limits:
+          cpus: 0.5
+          memory: 100M
+    networks:
+      - network-redis
+
+volumes:
+  redis:
+    name: redis
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /mnt/redis/vol/data
+
+networks:
+  network-redis:
+    name: network-redis
+    driver: bridge

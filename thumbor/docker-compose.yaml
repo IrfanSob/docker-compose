@@ -4,7 +4,7 @@ services:
     image: minimalcompact/thumbor:6.7.5
     restart: always
     ports:
-      - "80:8888"
+      - "8888:8888"
     environment:
       - TZ=Asia/Jakarta
       - HEALTHCHECK_ROUTE=/

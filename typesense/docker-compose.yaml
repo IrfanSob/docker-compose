@@ -9,7 +9,7 @@ services:
       - TZ=Asia/Jakarta
     volumes:
       - ./typesense-data:/data
-    command: '--data-dir /data --api-key=xyz --enable-cors'
+    command: '--data-dir /data --api-key=aGFsby1oYWxvLjh1bSFMbG9oYWxvaGEudHlwMzUkc2Vuc2Uh --enable-cors'
     logging:
       driver: "json-file"
       options:
